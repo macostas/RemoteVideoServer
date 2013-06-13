@@ -2,6 +2,7 @@ package remoteVideoServer;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -61,24 +62,34 @@ public class videoServer extends HttpServlet {
 		} else if (action.equalsIgnoreCase("getVideo")) {
 			System.out.println("Get Video");
 			if (sr != null) {
-				if (!sr.getCreatedMovieFiles().isEmpty()) {
+				if (sr.getCreatedMovieFiles() != null) {
+					// if (!sr.getCreatedMovieFiles().isEmpty()) {
 					String range = request.getHeader("range");
-					response.setContentType("video/avi");
-					byte[] data = Utilities.getBytesFromFile(sr.getCreatedMovieFiles()
-							.get(0));
-					response.setHeader("Content-Range",
-							range + Integer.valueOf(data.length - 1));
-					response.setHeader("Accept-Ranges", "bytes");
-					response.setHeader("Etag", "W/\"9767057-1323779115364\"");
-					byte[] content = new byte[1024];
-					BufferedInputStream is = new BufferedInputStream(
-							new ByteArrayInputStream(data));
-					OutputStream os = response.getOutputStream();
-					while (is.read(content) != -1) {
-						os.write(content);
+					if (response != null) {
+
+						System.out.println("getting video => " + sr.getCreatedMovieFiles().get(0));
+						byte[] data = Utilities
+								.getBytesFromFile(sr.getCreatedMovieFiles().get(0));
+						if (data != null) {
+							response.setHeader("Content-Range",
+									range + Integer.valueOf(data.length - 1));
+							response.setHeader("Accept-Ranges", "bytes");
+							response.setHeader("Content-Disposition", "attachment; filename=\"" + sr.getCreatedMovieFiles().get(0).getName() + "\"");
+							response.setHeader("Etag",
+									"W/\"9767057-1323779115364\"");
+							byte[] content = new byte[1024];
+							BufferedInputStream is = new BufferedInputStream(
+									new ByteArrayInputStream(data));
+							OutputStream os = response.getOutputStream();
+							while (is.read(content) != -1) {
+								os.write(content);
+							}  
+							is.close();
+							os.close();
+						}
+					} else {
+						System.out.println("response = null");
 					}
-					is.close();
-					os.close();
 				}
 			}
 		}
@@ -94,6 +105,5 @@ public class videoServer extends HttpServlet {
 		// TODO Auto-generated method stub
 		System.out.println("action POST->" + request.getParameter("action"));
 	}
-
 
 }

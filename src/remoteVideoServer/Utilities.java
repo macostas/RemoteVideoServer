@@ -54,6 +54,8 @@ public class Utilities {
 	}
 
 	public static byte[] getBytesFromFile(File file) throws IOException {
+		try{
+			
 		InputStream is = new FileInputStream(file);
 		// System.out.println("\nDEBUG: FileInputStream is " + file);
 		// Get the size of the file
@@ -85,6 +87,10 @@ public class Utilities {
 		}
 		is.close();
 		return bytes;
+		} catch (Exception e){
+			
+		}
+		return null;
 	}
 
 }
