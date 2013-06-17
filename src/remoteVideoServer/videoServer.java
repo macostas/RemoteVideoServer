@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -61,39 +62,27 @@ public class videoServer extends HttpServlet {
 			}
 		} else if (action.equalsIgnoreCase("getVideo")) {
 			System.out.println("Get Video");
+			Utilities.getVideos(request, response, sr);
+			
+
+		} else if (action.equalsIgnoreCase("getVideoName")) {
+			System.out.println("Get Video Name");
 			if (sr != null) {
 				if (sr.getCreatedMovieFiles() != null) {
-					// if (!sr.getCreatedMovieFiles().isEmpty()) {
-					String range = request.getHeader("range");
-					if (response != null) {
+					String videoName = sr.getCreatedMovieFiles().get(0)
+							.getName();
+					response.setContentLength(videoName.length());
+					OutputStream out = response.getOutputStream();
+					out.write(videoName.getBytes());
+					out.close();
+					out.flush();
 
-						System.out.println("getting video => " + sr.getCreatedMovieFiles().get(0));
-						byte[] data = Utilities
-								.getBytesFromFile(sr.getCreatedMovieFiles().get(0));
-						if (data != null) {
-							response.setHeader("Content-Range",
-									range + Integer.valueOf(data.length - 1));
-							response.setHeader("Accept-Ranges", "bytes");
-							response.setHeader("Content-Disposition", "attachment; filename=\"" + sr.getCreatedMovieFiles().get(0).getName() + "\"");
-							response.setHeader("Etag",
-									"W/\"9767057-1323779115364\"");
-							byte[] content = new byte[1024];
-							BufferedInputStream is = new BufferedInputStream(
-									new ByteArrayInputStream(data));
-							OutputStream os = response.getOutputStream();
-							while (is.read(content) != -1) {
-								os.write(content);
-							}  
-							is.close();
-							os.close();
-						}
-					} else {
-						System.out.println("response = null");
-					}
 				}
 			}
+		} else if (action.equalsIgnoreCase("getVideoFiles")) {
+			System.out.println("get video Files");
+			Utilities.showVideos(request, response);
 		}
-
 	}
 
 	/**
